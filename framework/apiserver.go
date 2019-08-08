@@ -1,12 +1,16 @@
+// +build integration
+
 package framework
 
 import (
-	"github.com/coreos/etcd/embed"
 	"io/ioutil"
 	"net"
 	"os"
 
-	athenzClientset "github.com/yahoo/k8s-athenz-syncer/pkg/client/clientset/versioned"
+	"github.com/coreos/etcd/embed"
+	"github.com/prabushyam/iframe-tests/fixtures"
+	athenzdomainclientset "github.com/yahoo/k8s-athenz-syncer/pkg/client/clientset/versioned"
+
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -16,13 +20,11 @@ import (
 )
 
 type Framework struct {
-	restConfig   *rest.Config
-	crdClientset *apiextensionsclient.Clientset
-	crClientset  *athenzClientset.Clientset
+	AthenzDomainClientset *athenzdomainclientset.Clientset
 }
 
 // runEtcd will setup up the etcd configuration and run the etcd server
-func (f *Framework) runEtcd() error {
+func runEtcd() error {
 	etcdDataDir, err := ioutil.TempDir(os.TempDir(), "integration_test_etcd_data")
 	if err != nil {
 		return err
@@ -35,12 +37,12 @@ func (f *Framework) runEtcd() error {
 }
 
 // runApiServer will setup the api configuration and run the api server
-func (f *Framework) runApiServer() error {
+func runApiServer() (*rest.Config, error) {
 	s := options.NewServerRunOptions()
 
 	listener, err := net.Listen("tcp4", "127.0.0.1:9999")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// TODO, remove the webhooks
@@ -51,64 +53,59 @@ func (f *Framework) runApiServer() error {
 
 	completedOptions, err := app.Complete(s)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if errs := completedOptions.Validate(); len(errs) != 0 {
-		return utilerrors.NewAggregate(errs)
+		return nil, utilerrors.NewAggregate(errs)
 	}
 
 	stopCh := genericapiserver.SetupSignalHandler()
 	server, err := app.CreateServerChain(completedOptions, stopCh)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = server.PrepareRun().NonBlockingRun(stopCh)
 
 	restConfig := &rest.Config{}
 	restConfig.Host = "http://127.0.0.1:9999"
-	f.restConfig = restConfig
-	return err
-}
-
-func (f *Framework) createClients() error {
-	rClientset, err := apiextensionsclient.NewForConfig(f.restConfig)
-	if err != nil {
-		return err
-	}
-	f.crdClientset = rClientset
-
-	versiondClient, err := athenzClientset.NewForConfig(f.restConfig)
-	if err != nil {
-		return err
-	}
-	f.crClientset = versiondClient
-	return nil
+	return restConfig, err
 }
 
 // RunApiServer will run both etcd and api server together
 func RunApiServer() (*Framework, error) {
-	f := &Framework{}
-	err := f.runEtcd()
+	err := runEtcd()
 	if err != nil {
-		return f, err
+		return nil, err
 	}
 
-	err = f.runApiServer()
+	restConfig, err := runApiServer()
 	if err != nil {
-		return f, err
+		return nil, err
 	}
 
-	err = f.createClients()
+	crdClientset, err := apiextensionsclient.NewForConfig(restConfig)
 	if err != nil {
-		return f, err
+		return nil, err
 	}
 
-	return f, nil
+	err = fixtures.CreateAthenzDomainCrd(crdClientset)
+	if err != nil {
+		return nil, err
+	}
+
+	athenzDomainClientset, err := athenzdomainclientset.NewForConfig(restConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Framework{
+		AthenzDomainClientset: athenzDomainClientset,
+	}, nil
 }
 
 // ShutdownApiServer will request the api server to shutdown
-func (f *Framework) ShutdownApiServer() {
+func ShutdownApiServer() {
 	genericapiserver.RequestShutdown()
 }

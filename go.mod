@@ -6,7 +6,7 @@ require (
 	github.com/ardielle/ardielle-go v1.5.2
 	github.com/coreos/etcd v3.3.13+incompatible
 	github.com/yahoo/athenz v1.8.23
-	github.com/yahoo/k8s-athenz-syncer v0.0.0-00010101000000-000000000000
+	github.com/yahoo/k8s-athenz-syncer v0.1.0
 	go.etcd.io/etcd v3.3.13+incompatible // indirect
 	k8s.io/apiextensions-apiserver v0.0.0
 	k8s.io/apimachinery v0.0.0
@@ -18,7 +18,6 @@ require (
 )
 
 replace (
-	github.com/yahoo/k8s-athenz-syncer => /Users/mcieplak/go/src/github.com/yahoo/k8s-athenz-syncer
 	k8s.io/api => k8s.io/api v0.0.0-20190805141119-fdd30b57c827
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20190805143126-cdb999c96590
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190612205821-1799e75a0719
