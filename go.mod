@@ -1,4 +1,4 @@
-module github.com/yahoo/iframe-tests
+module github.com/prabushyam/iframe-tests
 
 go 1.12
 
