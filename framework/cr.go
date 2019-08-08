@@ -6,14 +6,11 @@ import (
 	"github.com/ardielle/ardielle-go/rdl"
 	"github.com/yahoo/athenz/clients/go/zms"
 	athenz_domain "github.com/yahoo/k8s-athenz-syncer/pkg/apis/athenz/v1"
-	athenzClientset "github.com/yahoo/k8s-athenz-syncer/pkg/client/clientset/versioned"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
 )
 
-func CreateCrd(config *rest.Config) error {
+func (f *Framework) CreateCrd() error {
 	crd := &v1beta1.CustomResourceDefinition{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "CustomResourceDefinition",
@@ -42,17 +39,13 @@ func CreateCrd(config *rest.Config) error {
 		},
 	}
 
-	rClientset, err := apiextensionsclient.NewForConfig(config)
-	if err != nil {
-		return err
-	}
-	created, err := rClientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
+	created, err := f.crdClientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
 	if err != nil {
 		return err
 	}
 	log.Println("created:", created)
 
-	got, err := rClientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get("athenzdomains.athenz.io", metav1.GetOptions{})
+	got, err := f.crdClientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get("athenzdomains.athenz.io", metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -60,7 +53,7 @@ func CreateCrd(config *rest.Config) error {
 	return nil
 }
 
-func CreateCr(config *rest.Config) {
+func (f *Framework) CreateCr() {
 	domain := "home.foo"
 	fakeDomain := getFakeDomain()
 	newCR := &athenz_domain.AthenzDomain{
@@ -79,27 +72,21 @@ func CreateCr(config *rest.Config) {
 		},
 	}
 
-	versiondClient, err := athenzClientset.NewForConfig(config)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	list, err := versiondClient.AthenzV1().AthenzDomains().List(metav1.ListOptions{})
+	list, err := f.crClientset.AthenzV1().AthenzDomains().List(metav1.ListOptions{})
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	log.Println("list:", list)
 
-	created, err := versiondClient.AthenzV1().AthenzDomains().Create(newCR)
+	created, err := f.crClientset.AthenzV1().AthenzDomains().Create(newCR)
 	if err != nil {
 		log.Println("error creating athenz domain:", err)
 		return
 	}
 	log.Println("created cr:", created)
 
-	got, err := versiondClient.AthenzV1().AthenzDomains().Get(domain, metav1.GetOptions{})
+	got, err := f.crClientset.AthenzV1().AthenzDomains().Get(domain, metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 		return
