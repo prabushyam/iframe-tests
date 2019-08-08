@@ -17,11 +17,15 @@ limitations under the License.
 package main
 
 import (
+	"io/ioutil"
 	"log"
+	"net"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/ardielle/ardielle-go/rdl"
+	"github.com/coreos/etcd/embed"
 	"github.com/yahoo/athenz/clients/go/zms"
 	athenz_domain "github.com/yahoo/k8s-athenz-syncer/pkg/apis/athenz/v1"
 	athenzClientset "github.com/yahoo/k8s-athenz-syncer/pkg/client/clientset/versioned"
@@ -32,13 +36,23 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/kubernetes/cmd/kube-apiserver/app"
 	"k8s.io/kubernetes/cmd/kube-apiserver/app/options"
-	"k8s.io/kubernetes/test/integration/framework"
-	"net"
 )
 
-func TestFoo(t *testing.T) {
-	log.Println("inside foo")
+func TestApiServer(t *testing.T) {
+	etcdDataDir, err := ioutil.TempDir(os.TempDir(), "integration_test_etcd_data")
+	if err != nil {
+		log.Panicf("unable to make temp etcd data dir: %v", err)
+	}
 
+	cfg := embed.NewConfig()
+	cfg.Dir = etcdDataDir
+	//cfg.WalDir = etcdDataDir
+	_, err = embed.StartEtcd(cfg)
+	if err != nil {
+		log.Println(err)
+	}
+
+	//createEtcd()
 	s := options.NewServerRunOptions()
 
 	listener, err := net.Listen("tcp4", "127.0.0.1:9999")
@@ -48,7 +62,7 @@ func TestFoo(t *testing.T) {
 
 	s.InsecureServing.BindAddress = net.ParseIP("127.0.0.1")
 	s.InsecureServing.Listener = listener
-	s.Etcd.StorageConfig.Transport.ServerList = []string{framework.GetEtcdURL()}
+	s.Etcd.StorageConfig.Transport.ServerList = []string{"http://127.0.0.1:2379"}
 	s.SecureServing.ServerCert.CertDirectory = "/tmp"
 
 	completedOptions, err := app.Complete(s)
@@ -61,9 +75,7 @@ func TestFoo(t *testing.T) {
 	}
 
 	go app.Run(completedOptions, genericapiserver.SetupSignalHandler())
-	//if err != nil {
-	//	log.Panic(err)
-	//}
+
 	createCrd()
 	time.Sleep(time.Second * 15)
 	createCr()
