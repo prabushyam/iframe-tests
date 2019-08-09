@@ -12,6 +12,7 @@ require (
 	k8s.io/apimachinery v0.0.0
 	k8s.io/apiserver v0.0.0
 	k8s.io/client-go v8.0.0+incompatible
+	k8s.io/klog v0.3.1
 	k8s.io/kube-aggregator v0.0.0-00010101000000-000000000000 // indirect
 	k8s.io/kubernetes v1.15.2
 	sigs.k8s.io/structured-merge-diff v0.0.0-20190724202554-0c1d754dd648 // indirect

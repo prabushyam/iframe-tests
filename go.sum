@@ -385,6 +385,7 @@ github.com/xiang90/probing v0.0.0-20160813154853-07dd2e8dfe18/go.mod h1:UETIi67q
 github.com/xlab/handysort v0.0.0-20150421192137-fb3537ed64a1/go.mod h1:QcJo0QPSfTONNIgpN5RA8prR7fF8nkF6cTWTcNerRO8=
 github.com/yahoo/athenz v1.8.23 h1:5s9keEQG88iflPFRh1d0RjWvi9TUhCr3dwsb7XnuY3o=
 github.com/yahoo/athenz v1.8.23/go.mod h1:wQ3kpWCncoxMXxj2mr/Gf6YJwtE+Uwk7DOPYpm/C99A=
+github.com/yahoo/k8s-athenz-istio-auth v0.1.0 h1:h5t6R/bLI4IhDiYom6DWMJmaMPu3AuSNuUDrlup9wzw=
 github.com/yahoo/k8s-athenz-syncer v0.0.0-20190727000557-d1cf839374ba h1:7zcNw5S76NoctMaAYLUEWYViiGc6G2Av5dttJhqrEmo=
 github.com/yahoo/k8s-athenz-syncer v0.0.0-20190727000557-d1cf839374ba/go.mod h1:t1ydywF6UazWvlVTzpsz/8Y4f/QJsEm0Mpbq8JZewns=
 github.com/yahoo/k8s-athenz-syncer v0.1.0 h1:vzilLZDleCyej8x6ZxU78o23F8dW1ZnraW5Sbz6ImqI=
