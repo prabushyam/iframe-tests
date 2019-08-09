@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/prabushyam/iframe-tests/fixtures"
-	"time"
 )
 
 func TestApiServer(t *testing.T) {
@@ -20,5 +19,4 @@ func TestApiServer(t *testing.T) {
 	}
 	defer f.Teardown()
 	fixtures.CreateAthenzDomain(f.AthenzDomainClientset)
-	time.Sleep(time.Second * 15)
 }

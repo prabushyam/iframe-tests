@@ -10,22 +10,23 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
-			"os"
-		"github.com/coreos/etcd/embed"
+	"os"
+
+	"github.com/coreos/etcd/embed"
 	"github.com/prabushyam/iframe-tests/fixtures"
 	athenzdomainclientset "github.com/yahoo/k8s-athenz-syncer/pkg/client/clientset/versioned"
 
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-		"k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubernetes/cmd/kube-apiserver/app"
 	"k8s.io/kubernetes/cmd/kube-apiserver/app/options"
-	)
+)
 
 type Framework struct {
 	AthenzDomainClientset *athenzdomainclientset.Clientset
-	etcd *embed.Etcd
-	stopCh chan struct{}
+	etcd                  *embed.Etcd
+	stopCh                chan struct{}
 }
 
 // runEtcd will setup up the etcd configuration and run the etcd server
@@ -87,7 +88,7 @@ func Setup() (*Framework, error) {
 		return nil, err
 	}
 
-	err = fixtures.CreateAthenzDomainCrd(crdClientset)
+	err = fixtures.CreateCrds(crdClientset)
 	if err != nil {
 		return nil, err
 	}
@@ -99,8 +100,8 @@ func Setup() (*Framework, error) {
 
 	return &Framework{
 		AthenzDomainClientset: athenzDomainClientset,
-		etcd: etcd,
-		stopCh: stopCh,
+		etcd:                  etcd,
+		stopCh:                stopCh,
 	}, nil
 }
 
